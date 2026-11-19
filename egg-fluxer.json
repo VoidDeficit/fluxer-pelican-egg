@@ -20,10 +20,10 @@
   "file_denylist": [
     ".pgpass_fluxer"
   ],
-  "startup": "export FLUXER_HTTP_PORT={{SERVER_PORT}}; if [ ! -f data/.fluxer-init ]; then /opt/fluxer/current/bin/fluxerd init && touch data/.fluxer-init; fi; /opt/fluxer/current/bin/fluxerd run",
+  "startup": "if [ ! -f data/.fluxer-init ]; then /opt/fluxer/current/bin/fluxerd init && touch data/.fluxer-init; fi; exec /opt/fluxer/current/bin/fluxerd run",
   "config": {
     "files": "{}",
-    "startup": "{\"done\": [\"setup token\", \"listening\"]}",
+    "startup": "{\"done\": \"every child is ready\"}",
     "logs": "{}",
     "stop": "^C"
   },
@@ -140,6 +140,58 @@
       "rules": [
         "required",
         "in:smtp,off"
+      ]
+    },
+    {
+      "sort": 9,
+      "name": "Listen port",
+      "description": "Port Fluxer serves plain HTTP on (the server allocation)",
+      "env_variable": "FLUXER_HTTP_PORT",
+      "default_value": "{{SERVER_PORT}}",
+      "user_viewable": true,
+      "user_editable": false,
+      "rules": [
+        "required",
+        "string"
+      ]
+    },
+    {
+      "sort": 10,
+      "name": "Edge site address",
+      "description": "Caddy site address for Fluxer's built-in edge. http://:PORT = plain HTTP, no automatic HTTPS; put a TLS reverse proxy in front.",
+      "env_variable": "FLUXER_EDGE_SITE_ADDRESS",
+      "default_value": "http://:{{SERVER_PORT}}",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": [
+        "required",
+        "string"
+      ]
+    },
+    {
+      "sort": 11,
+      "name": "Edge protocols",
+      "description": "HTTP versions the edge serves",
+      "env_variable": "FLUXER_EDGE_PROTOCOLS",
+      "default_value": "h1",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": [
+        "required",
+        "string"
+      ]
+    },
+    {
+      "sort": 12,
+      "name": "Trusted proxies",
+      "description": "IP ranges of your reverse proxy, space separated, whose X-Forwarded-For Fluxer trusts",
+      "env_variable": "FLUXER_EDGE_TRUSTED_PROXIES",
+      "default_value": "private_ranges",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": [
+        "required",
+        "string"
       ]
     }
   ]

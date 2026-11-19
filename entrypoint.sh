@@ -1,11 +1,12 @@
 #!/bin/sh
 set -e
 cd /home/container
-mkdir -p data
+mkdir -p data etc /tmp/fluxer-run
 
 # Pelican's UID usually has no passwd entry; Postgres refuses to run without one.
 if ! getent passwd "$(id -u)" >/dev/null; then
-  echo "container:x:$(id -u):$(id -g)::/home/container:/bin/sh" >> /etc/passwd
+  echo "container:x:$(id -u):$(id -g)::/home/container:/bin/sh" >> /etc/passwd 2>/dev/null \
+    || echo "[fluxer-egg] warning: UID $(id -u) has no passwd entry (read-only root); set Wings user to 999 or rebuild"
 fi
 
 # Built-in PostgreSQL, used unless FLUXER_POSTGRES_URL points elsewhere.
