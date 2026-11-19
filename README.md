@@ -10,7 +10,7 @@ Fluxer does not publish a public image, so build it first in a clone of `fluxera
 make toolchain native-deps dist && make image   # tags fluxer:dev
 ```
 
-Then build and push the Pelican wrapper from this repo:
+GitHub Actions builds and pushes `ghcr.io/voiddeficit/fluxer-pelican` on every push to `main`, weekly, and on demand (Actions → Build image → Run workflow). To build by hand instead, run this from this repo:
 
 ```bash
 docker build -t ghcr.io/voiddeficit/fluxer-pelican:latest .
