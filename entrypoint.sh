@@ -21,8 +21,16 @@ if [ -z "$FLUXER_POSTGRES_URL" ]; then
     rm -f /tmp/pwfile
   fi
   PGPASS=$(cat /home/container/.pgpass_fluxer)
-  pg_ctl -D "$PGDATA" -l /home/container/postgres.log -w \
+  # A fresh container never has a running Postgres; a leftover pid file after a
+  # crash can match a new PID and make pg_ctl return before the server is up.
+  rm -f "$PGDATA/postmaster.pid"
+  pg_ctl -D "$PGDATA" -l /home/container/postgres.log \
     -o "-c listen_addresses=127.0.0.1 -p $PGPORT -k /tmp" start
+  i=0
+  until pg_isready -q -h 127.0.0.1 -p "$PGPORT"; do
+    i=$((i+1)); [ $i -ge 60 ] && { echo "[fluxer-egg] PostgreSQL did not start"; tail -20 /home/container/postgres.log; exit 1; }
+    sleep 1
+  done
   PGPASSWORD=$PGPASS psql -h 127.0.0.1 -p "$PGPORT" -U fluxer -d postgres -tAc \
     "SELECT 1 FROM pg_database WHERE datname='fluxer'" | grep -q 1 \
     || PGPASSWORD=$PGPASS createdb -h 127.0.0.1 -p "$PGPORT" -U fluxer fluxer

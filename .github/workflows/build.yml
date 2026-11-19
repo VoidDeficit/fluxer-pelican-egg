@@ -11,6 +11,10 @@ on:
       fluxer_ref:
         description: Fluxer branch, tag or commit to build
         default: main
+      rebuild_fluxer:
+        description: Rebuild Fluxer itself (about 55 min). Off = only rebuild the Pelican layer on the last image.
+        type: boolean
+        default: true
 
 permissions:
   contents: read
@@ -24,6 +28,16 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 180
     steps:
+      - name: Decide build mode
+        id: mode
+        run: |
+          # Pushes only change the wrapper, so reuse the Fluxer build from the last image.
+          if [ "${{ github.event_name }}" = "push" ] || [ "${{ inputs.rebuild_fluxer }}" = "false" ]; then
+            echo "full=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "full=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Free disk space (Fluxer build needs ~15 GB)
         run: |
           sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
@@ -33,6 +47,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Check out Fluxer
+        if: steps.mode.outputs.full == 'true'
         uses: actions/checkout@v4
         with:
           repository: fluxerapp/fluxer
@@ -40,6 +55,7 @@ jobs:
           path: fluxer
 
       - name: Build Fluxer image (fluxer:dev)
+        if: steps.mode.outputs.full == 'true'
         working-directory: fluxer
         run: |
           make image IMAGE=fluxer:dev
@@ -54,7 +70,12 @@ jobs:
       - name: Build and push Pelican image
         run: |
           IMAGE=$(echo "$IMAGE" | tr '[:upper:]' '[:lower:]')
-          docker build --build-arg BASE=fluxer:dev \
-            -t "$IMAGE:latest" -t "$IMAGE:fluxer-$FLUXER_SHA" .
+          if [ "${{ steps.mode.outputs.full }}" = "true" ]; then
+            BASE=fluxer:dev; TAG="fluxer-$FLUXER_SHA"
+          else
+            docker pull "$IMAGE:latest"
+            BASE="$IMAGE:latest"; TAG="wrapper-${GITHUB_SHA::7}"
+          fi
+          docker build --build-arg BASE="$BASE" -t "$IMAGE:latest" -t "$IMAGE:$TAG" .
           docker push "$IMAGE:latest"
-          docker push "$IMAGE:fluxer-$FLUXER_SHA"
+          docker push "$IMAGE:$TAG"
