@@ -1,0 +1,32 @@
+# Fluxer Pelican Egg
+
+A [Pelican Panel](https://pelican.dev) egg for [Fluxer](https://github.com/fluxerapp/fluxer), the open-source chat and voice platform.
+
+## Build the image
+
+Fluxer does not publish a public image, so build it first in a clone of `fluxerapp/fluxer`:
+
+```bash
+make toolchain native-deps dist && make image   # tags fluxer:dev
+```
+
+Then build and push the Pelican wrapper from this repo:
+
+```bash
+docker build -t ghcr.io/voiddeficit/fluxer-pelican:latest .
+docker push ghcr.io/voiddeficit/fluxer-pelican:latest
+```
+
+## Install
+
+1. Admin → Eggs → Import → `egg-fluxer.json`.
+2. Create a server with that egg.
+3. Set **Domain** and **Postgres URL** (`postgres://user:pass@host:5432/fluxer`). Pelican database hosts are MySQL only, so Postgres must run separately.
+4. Put a TLS reverse proxy in front of the allocated port.
+5. Start the server, open the domain and enter the setup token printed in the console.
+
+## Notes
+
+- Uses Postgres for cache/queues (no Valkey) and stores uploads in `/home/container/data`.
+- Voice (LiveKit) is not configured.
+- Untested: startup command and port handling may need adjusting.
