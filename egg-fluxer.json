@@ -20,7 +20,7 @@
   "file_denylist": [
     ".pgpass_fluxer"
   ],
-  "startup": "FLUXER_HTTP_PORT={{SERVER_PORT}} /opt/fluxer/current/bin/fluxerd",
+  "startup": "export FLUXER_HTTP_PORT={{SERVER_PORT}}; if [ ! -f data/.fluxer-init ]; then /opt/fluxer/current/bin/fluxerd init && touch data/.fluxer-init; fi; /opt/fluxer/current/bin/fluxerd run",
   "config": {
     "files": "{}",
     "startup": "{\"done\": [\"setup token\", \"listening\"]}",
