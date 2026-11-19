@@ -21,12 +21,13 @@ docker push ghcr.io/voiddeficit/fluxer-pelican:latest
 
 1. Admin → Eggs → Import → `egg-fluxer.json`.
 2. Create a server with that egg.
-3. Set **Domain** and **Postgres URL** (`postgres://user:pass@host:5432/fluxer`). Pelican database hosts are MySQL only, so Postgres must run separately.
+3. Set **Domain**. PostgreSQL runs inside the container (data in `/home/container/postgres`, listening on 127.0.0.1 only). To use an external server instead, set **External Postgres URL**.
 4. Put a TLS reverse proxy in front of the allocated port.
 5. Start the server, open the domain and enter the setup token printed in the console.
 
 ## Notes
 
+- The built-in database password is generated on first start and kept in `/home/container/.pgpass_fluxer` (hidden from the file manager).
 - Uses Postgres for cache/queues (no Valkey) and stores uploads in `/home/container/data`.
 - Voice (LiveKit) is not configured.
 - Untested: startup command and port handling may need adjusting.

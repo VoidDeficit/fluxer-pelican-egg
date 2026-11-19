@@ -1,15 +1,25 @@
 {
   "_comment": "Pelican Panel egg for Fluxer (self-hosted chat). Requires a Postgres database.",
-  "meta": { "version": "PLCN_v1", "update_url": null },
+  "meta": {
+    "version": "PLCN_v1",
+    "update_url": null
+  },
   "exported_at": "2026-11-19T00:00:00+00:00",
   "name": "Fluxer",
   "author": "71215245+VoidDeficit@users.noreply.github.com",
   "uuid": "6b1f2c4e-9a3d-4f7e-8c21-5d0e9f3a7b11",
-  "description": "Fluxer - open-source chat and voice platform (single-process mode). Needs a Postgres database; create one in the server's Databases tab and fill in the URL variable.",
-  "tags": ["chat", "voip"],
+  "description": "Fluxer - open-source chat and voice platform (single-process mode) with a built-in PostgreSQL database.",
+  "tags": [
+    "chat",
+    "voip"
+  ],
   "features": [],
-  "docker_images": { "Fluxer": "ghcr.io/voiddeficit/fluxer-pelican:latest" },
-  "file_denylist": [],
+  "docker_images": {
+    "Fluxer": "ghcr.io/voiddeficit/fluxer-pelican:latest"
+  },
+  "file_denylist": [
+    ".pgpass_fluxer"
+  ],
   "startup": "FLUXER_HTTP_PORT={{SERVER_PORT}} /opt/fluxer/current/bin/fluxerd",
   "config": {
     "files": "{}",
@@ -25,13 +35,112 @@
     }
   },
   "variables": [
-    { "sort": 1, "name": "Domain", "description": "Public domain Fluxer is served on, e.g. chat.example.com", "env_variable": "FLUXER_DOMAIN", "default_value": "chat.example.com", "user_viewable": true, "user_editable": true, "rules": ["required", "string", "max:253"] },
-    { "sort": 2, "name": "Postgres URL", "description": "postgres://user:password@host:5432/dbname (use the database Pelican created for this server)", "env_variable": "FLUXER_POSTGRES_URL", "default_value": "", "user_viewable": true, "user_editable": true, "rules": ["required", "string"] },
-    { "sort": 3, "name": "Public scheme", "description": "https when a reverse proxy terminates TLS in front of this port, otherwise http", "env_variable": "FLUXER_PUBLIC_SCHEME", "default_value": "https", "user_viewable": true, "user_editable": true, "rules": ["required", "in:http,https"] },
-    { "sort": 4, "name": "Setup token", "description": "Token for the first-run setup wizard (32-256 chars). Leave empty to have one generated and printed in the console once.", "env_variable": "FLUXER_SETUP_TOKEN", "default_value": "", "user_viewable": true, "user_editable": true, "rules": ["nullable", "string", "min:32", "max:256"] },
-    { "sort": 5, "name": "KV mode", "description": "Keep 'postgres' so no Valkey is needed", "env_variable": "FLUXER_KV_MODE", "default_value": "postgres", "user_viewable": true, "user_editable": false, "rules": ["required", "in:postgres,standalone,cluster"] },
-    { "sort": 6, "name": "Storage backend", "description": "filesystem keeps uploads in the server's data folder", "env_variable": "FLUXER_STORAGE_BACKEND", "default_value": "filesystem", "user_viewable": true, "user_editable": true, "rules": ["required", "in:filesystem,s3"] },
-    { "sort": 7, "name": "Process mode", "description": "single = all Rust services in one process", "env_variable": "FLUXER_RUST_PROCESS", "default_value": "single", "user_viewable": true, "user_editable": false, "rules": ["required", "in:single,per-service"] },
-    { "sort": 8, "name": "Email delivery", "description": "smtp or off", "env_variable": "FLUXER_EMAIL_DELIVERY", "default_value": "off", "user_viewable": true, "user_editable": true, "rules": ["required", "in:smtp,off"] }
+    {
+      "sort": 1,
+      "name": "Domain",
+      "description": "Public domain Fluxer is served on, e.g. chat.example.com",
+      "env_variable": "FLUXER_DOMAIN",
+      "default_value": "chat.example.com",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": [
+        "required",
+        "string",
+        "max:253"
+      ]
+    },
+    {
+      "sort": 2,
+      "name": "External Postgres URL (optional)",
+      "description": "Leave empty to use the built-in PostgreSQL stored in the server folder. Otherwise postgres://user:password@host:5432/dbname",
+      "env_variable": "FLUXER_POSTGRES_URL",
+      "default_value": "",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": [
+        "nullable",
+        "string"
+      ]
+    },
+    {
+      "sort": 3,
+      "name": "Public scheme",
+      "description": "https when a reverse proxy terminates TLS in front of this port, otherwise http",
+      "env_variable": "FLUXER_PUBLIC_SCHEME",
+      "default_value": "https",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": [
+        "required",
+        "in:http,https"
+      ]
+    },
+    {
+      "sort": 4,
+      "name": "Setup token",
+      "description": "Token for the first-run setup wizard (32-256 chars). Leave empty to have one generated and printed in the console once.",
+      "env_variable": "FLUXER_SETUP_TOKEN",
+      "default_value": "",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": [
+        "nullable",
+        "string",
+        "min:32",
+        "max:256"
+      ]
+    },
+    {
+      "sort": 5,
+      "name": "KV mode",
+      "description": "Keep 'postgres' so no Valkey is needed",
+      "env_variable": "FLUXER_KV_MODE",
+      "default_value": "postgres",
+      "user_viewable": true,
+      "user_editable": false,
+      "rules": [
+        "required",
+        "in:postgres,standalone,cluster"
+      ]
+    },
+    {
+      "sort": 6,
+      "name": "Storage backend",
+      "description": "filesystem keeps uploads in the server's data folder",
+      "env_variable": "FLUXER_STORAGE_BACKEND",
+      "default_value": "filesystem",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": [
+        "required",
+        "in:filesystem,s3"
+      ]
+    },
+    {
+      "sort": 7,
+      "name": "Process mode",
+      "description": "single = all Rust services in one process",
+      "env_variable": "FLUXER_RUST_PROCESS",
+      "default_value": "single",
+      "user_viewable": true,
+      "user_editable": false,
+      "rules": [
+        "required",
+        "in:single,per-service"
+      ]
+    },
+    {
+      "sort": 8,
+      "name": "Email delivery",
+      "description": "smtp or off",
+      "env_variable": "FLUXER_EMAIL_DELIVERY",
+      "default_value": "off",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": [
+        "required",
+        "in:smtp,off"
+      ]
+    }
   ]
 }
