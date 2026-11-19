@@ -167,6 +167,60 @@
         "required",
         "string"
       ]
+    },
+    {
+      "sort": 11,
+      "name": "Voice (LiveKit)",
+      "description": "true = enable the bundled LiveKit voice/video server. Needs the TCP and UDP ports below as extra allocations on a public IP.",
+      "env_variable": "FLUXER_LIVEKIT_ENABLED",
+      "default_value": "false",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": [
+        "required",
+        "in:true,false"
+      ]
+    },
+    {
+      "sort": 12,
+      "name": "Voice public IP",
+      "description": "Public IP clients send voice traffic to (the IP of the voice allocations)",
+      "env_variable": "FLUXER_LIVEKIT_NODE_IP",
+      "default_value": "",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": [
+        "nullable",
+        "ip"
+      ]
+    },
+    {
+      "sort": 13,
+      "name": "Voice TCP port",
+      "description": "LiveKit ICE/TCP port; add it as an allocation",
+      "env_variable": "FLUXER_LIVEKIT_TCP_PORT",
+      "default_value": "7881",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": [
+        "required",
+        "integer",
+        "between:1024,65535"
+      ]
+    },
+    {
+      "sort": 14,
+      "name": "Voice UDP port",
+      "description": "LiveKit media UDP port; add it as an allocation",
+      "env_variable": "FLUXER_LIVEKIT_UDP_PORT",
+      "default_value": "7882",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": [
+        "required",
+        "integer",
+        "between:1024,65535"
+      ]
     }
   ]
 }
